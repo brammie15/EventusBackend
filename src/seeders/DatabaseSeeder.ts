@@ -1,6 +1,7 @@
 import { Collection, EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 import { Dienst } from '../entities/Dienst.entity';
+import { Event } from '../entities/Event.entity';
 import { Pakket } from '../entities/Pakket.entity';
 import { Product } from '../entities/Product.entity';
 import { Winkel } from '../entities/Winkel.entity';
@@ -54,15 +55,23 @@ export class DatabaseSeeder extends Seeder {
   drankPakket: Pakket = new Pakket(
     "Drankpakket",
     100,
-    this.getIndexes([0], this.producten),
+    this.getIndexes([0,1], this.producten),
     this.getIndexes([0], this.diensten)
   );
 
   foodPakket: Pakket = new Pakket(
     "Foodpakket",
     150,
-    this.getIndexes([8,9,10,11,12,13], this.producten),
+    this.getIndexes([0,1,2], this.producten),
     this.getIndexes([3], this.diensten)
+  );
+
+  sweet18: Event = new Event(
+    "Sweet 18",
+    100,
+    this.getIndexes([0,1,2], this.diensten),
+    this.getIndexes([0,1,2], this.producten),
+    [this.drankPakket, this.foodPakket]
   );
 
 
@@ -76,8 +85,10 @@ export class DatabaseSeeder extends Seeder {
     this.diensten.forEach(dienst => {
       em.create(Dienst, dienst);
     });
-    // em.create(Pakket, this.drankPakket);
-    // em.create(Pakket, this.foodPakket);
+    em.create(Pakket, this.drankPakket);
+    em.create(Pakket, this.foodPakket);
+  
+    em.create(Event, this.sweet18);
   }
 
 }

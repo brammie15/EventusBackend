@@ -1,6 +1,6 @@
 import Router from 'koa-router';
 import { Context } from 'koa';
-import * as dienstenService from '../service/dienst.service';
+import * as eventService from '../service/event.service';
 import { RequestContext } from '@mikro-orm/core';
 import { DI } from '../data/data-index';
 import { Winkel } from '../entities/Winkel.entity';
@@ -11,7 +11,7 @@ import ValidationResult from 'koa-req-validation/dist/lib/ValidationResult';
 
 const getAll = async (ctx: Context) : Promise<void> => {
     try {
-        ctx.body = await dienstenService.getAll();
+        ctx.body = await eventService.getAll();
     } catch (error) {
         console.log(error);
         return ctx.throw(400, {message : error.message})        
@@ -25,18 +25,17 @@ const getByID = async (ctx: Context) : Promise<void> => {
             ctx.body = RequestError(400, errors.mapped());
             return;
         }
-        const winkel = await dienstenService.getByID(Number(ctx.params.id));
+        const winkel = await eventService.getByID(Number(ctx.params.id));
         ctx.body = winkel;
     } catch (error) {
         console.log(error);
         return ctx.throw(400, {message : error.message})
     }
 }
-
 const create = async (ctx: Context) : Promise<void> => {
     try {
-        const product = await dienstenService.create(ctx.request.body);
-        ctx.body = product;
+        const pakket = await eventService.create(ctx.request.body);
+        ctx.body = pakket;
     }
     catch (error) {
         console.log(error);
@@ -46,20 +45,20 @@ const create = async (ctx: Context) : Promise<void> => {
         
 
 
-export function installDientRouter(app) : void{
-    const productRouter : Router = new Router({
-        prefix: '/dienst',
+export function installEventRouter(app) : void{
+    const eventRouter : Router = new Router({
+        prefix: '/event',
 
     });
 
     const createValidation = [
-        body('naam').isLength({min: 1}).withMessage('Name is required').build(),
-        body('prijs').isNumeric().withMessage('Price is required').build(),
+        body('naam').isLength({ min: 1 }).withMessage('Naam is required').build(),
+        body('prijs').isFloat().isLength({ min: 1 }).withMessage('Prijs is required').build(),
     ]
 
-    productRouter.get('/', getAll);
-    productRouter.get('/:id', ...getByIDValidation,  getByID)
-    productRouter.post('/', ...createValidation,  create);
+    eventRouter.get('/', getAll);
+    eventRouter.get('/:id',...getByIDValidation, getByID)
+    eventRouter.post('/', ...createValidation,  create);
 
-    app.use(productRouter.routes()).use(productRouter.allowedMethods());
+    app.use(eventRouter.routes()).use(eventRouter.allowedMethods());
 }   

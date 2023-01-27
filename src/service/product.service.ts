@@ -1,7 +1,7 @@
 import { DI } from "../data/data-index";
 import { Product } from "../entities/Product.entity";
 import { Winkel } from "../entities/Winkel.entity";
-import { getRequest } from "./returnTypes";
+import { getRequest } from "../returnTypes";
 
 
 
@@ -16,6 +16,11 @@ export const getAll = async () : Promise<getRequest> => {
     }
     console.log(outputProducten)
     return outputProducten;
+}
+
+export const getByID = async (id: number) : Promise<Product> => {
+    const product = await DI.productenRepo.findOne({id});
+    return product;
 }
 
 export const create = async (body: any) : Promise<Product> => {

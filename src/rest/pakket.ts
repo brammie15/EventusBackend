@@ -1,6 +1,6 @@
 import Router from 'koa-router';
 import { Context } from 'koa';
-import * as dienstenService from '../service/dienst.service';
+import * as pakketenService from '../service/pakket.service';
 import { RequestContext } from '@mikro-orm/core';
 import { DI } from '../data/data-index';
 import { Winkel } from '../entities/Winkel.entity';
@@ -11,7 +11,7 @@ import ValidationResult from 'koa-req-validation/dist/lib/ValidationResult';
 
 const getAll = async (ctx: Context) : Promise<void> => {
     try {
-        ctx.body = await dienstenService.getAll();
+        ctx.body = await pakketenService.getAll();
     } catch (error) {
         console.log(error);
         return ctx.throw(400, {message : error.message})        
@@ -25,8 +25,7 @@ const getByID = async (ctx: Context) : Promise<void> => {
             ctx.body = RequestError(400, errors.mapped());
             return;
         }
-        const winkel = await dienstenService.getByID(Number(ctx.params.id));
-        ctx.body = winkel;
+        ctx.body = await pakketenService.getByID(Number(ctx.params.id));
     } catch (error) {
         console.log(error);
         return ctx.throw(400, {message : error.message})
@@ -35,8 +34,8 @@ const getByID = async (ctx: Context) : Promise<void> => {
 
 const create = async (ctx: Context) : Promise<void> => {
     try {
-        const product = await dienstenService.create(ctx.request.body);
-        ctx.body = product;
+        const pakket = await pakketenService.create(ctx.request.body);
+        ctx.body = pakket;
     }
     catch (error) {
         console.log(error);
@@ -46,20 +45,22 @@ const create = async (ctx: Context) : Promise<void> => {
         
 
 
-export function installDientRouter(app) : void{
-    const productRouter : Router = new Router({
-        prefix: '/dienst',
+export function installPakketRouter(app) : void{
+    const pakketRouter : Router = new Router({
+        prefix: '/pakket',
 
     });
 
     const createValidation = [
-        body('naam').isLength({min: 1}).withMessage('Name is required').build(),
-        body('prijs').isNumeric().withMessage('Price is required').build(),
+        body('naam').isLength({ min: 1 }).withMessage('Naam is required').build(),
+        body('prijs').isFloat().isLength({ min: 1 }).withMessage('Prijs is required').build(),
+        // body('diensten').withMessage('Diensten is required').build(), //Not sure to not make this required cuz paketten could only have diesnt of producten ? eh fuck it
+        // body('producten').withMessage('Producten is required').build(),
     ]
 
-    productRouter.get('/', getAll);
-    productRouter.get('/:id', ...getByIDValidation,  getByID)
-    productRouter.post('/', ...createValidation,  create);
+    pakketRouter.get('/', getAll);
+    pakketRouter.get('/:id',...getByIDValidation, getByID);
+    pakketRouter.post('/', ...createValidation, create);
 
-    app.use(productRouter.routes()).use(productRouter.allowedMethods());
+    app.use(pakketRouter.routes()).use(pakketRouter.allowedMethods());
 }   

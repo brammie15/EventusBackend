@@ -1,6 +1,6 @@
 import { DI } from "../data/data-index";
 import { Winkel } from "../entities/Winkel.entity";
-import { getRequest } from "./returnTypes";
+import { databaseOperationResult, getRequest } from "../returnTypes";
 
 
 
@@ -14,8 +14,23 @@ export const getAll = async () : Promise<getRequest> => {
     return outputWinkels;
 }
 
-export const create = async (body: any) : Promise<Winkel> => {
-    const newWinkel = await DI.winkelRepo.create(body);
-    await DI.winkelRepo.persistAndFlush(newWinkel);
-    return newWinkel;
+export const getByID = async (id: number) : Promise<Winkel> => {
+    const winkel = await DI.winkelRepo.findOne({id});
+    return winkel;
+}
+
+export const create = async (body: any) : Promise<databaseOperationResult> => {
+    try {
+        const newWinkel = await DI.winkelRepo.create(body);
+        await DI.winkelRepo.persistAndFlush(newWinkel);
+        return {
+            result: newWinkel,
+            errors: []
+        };
+    } catch (error) {
+        return {
+            result: null,
+            errors: [error]
+        };
+    }
 }

@@ -7,6 +7,7 @@ import { Winkel } from '../entities/Winkel.entity';
 import { body, query, validationResults } from 'koa-req-validation';
 import ValidationResult from 'koa-req-validation/dist/lib/ValidationResult';
 import { IMappedValidationResults } from 'koa-req-validation/dist/lib/types';
+import { getByIDValidation, RequestError } from './requestError';
 
 const getAll = async (ctx: Context) : Promise<void> => {
     try {
@@ -17,17 +18,20 @@ const getAll = async (ctx: Context) : Promise<void> => {
     }
 }
 
-type createWinkelRequest = {
-    naam: string;
-}
-
-function RequestError(code: number, errors: any) {
-    return {
-        code: code,
-        errors: errors
+const getByID = async (ctx: Context) : Promise<void> => {
+    try {
+        const errors : ValidationResult = validationResults(ctx);
+        if(errors.hasErrors()){
+            ctx.body = RequestError(400, errors.mapped());
+            return;
+        }
+        const winkel = await winkelService.getByID(Number(ctx.params.id));
+        ctx.body = winkel;
+    } catch (error) {
+        console.log(error);
+        return ctx.throw(400, {message : error.message})
     }
 }
-
 
 const create = async (ctx: Context) : Promise<void> => {
     try {
@@ -37,11 +41,12 @@ const create = async (ctx: Context) : Promise<void> => {
             ctx.body = RequestError(400, errors.mapped());
             return;
         }
-        const winkelReq : createWinkelRequest = <createWinkelRequest>ctx.request.body;
-
-        // const newWinkel : Winkel = new Winkel(ctx.request.body);
-        const winkel = await winkelService.create(winkelReq);
-        ctx.body = winkel;
+        const winkel = await winkelService.create(body);
+        if(winkel.errors.length > 0){
+            ctx.body = RequestError(400, winkel.errors);
+            return;
+        }
+        ctx.body = winkel.result;
     }
     catch (error) {
         console.log(error);
@@ -49,8 +54,6 @@ const create = async (ctx: Context) : Promise<void> => {
     }
 }
         
-
-
 export function installWinkelRoutes(app) : void{
     const winkelRouter : Router = new Router({
         prefix: '/winkel',
@@ -62,8 +65,8 @@ export function installWinkelRoutes(app) : void{
     ]
 
     winkelRouter.get('/', getAll);
+    winkelRouter.get('/:id', ...getByIDValidation, getByID);
     winkelRouter.post('/', ...createValidation, create);
 
     app.use(winkelRouter.routes()).use(winkelRouter.allowedMethods());
-}   
-
+}

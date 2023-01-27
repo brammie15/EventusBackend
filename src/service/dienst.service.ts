@@ -1,6 +1,6 @@
 import { DI } from "../data/data-index";
 import { Dienst } from "../entities/Dienst.entity";
-import { getRequest } from "./returnTypes";
+import { getRequest } from "../returnTypes";
 
 
 
@@ -13,6 +13,11 @@ export const getAll = async () : Promise<getRequest> => {
     }
     console.log(outputDiensten)
     return outputDiensten;
+}
+
+export const getByID = async (id: number) : Promise<Dienst> => {
+    const dienst = await DI.dienstenRepo.findOne({id});
+    return dienst;
 }
 
 export const create = async (body: any) : Promise<Dienst> => {

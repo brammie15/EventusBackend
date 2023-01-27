@@ -1,6 +1,8 @@
 import { Context } from 'koa';
 import Router, { RouterContext } from 'koa-router';
 import { installDientRouter } from './dienst';
+import { installEventRouter } from './event';
+import { installPakketRouter } from './pakket';
 import { installProductRouter } from './product';
 import { installWinkelRoutes } from './winkel';
 
@@ -28,6 +30,8 @@ export async function installRest(app) : Promise<void>{
 
     installWinkelRoutes(apiRouter);    
     installProductRouter(apiRouter);
-    installDientRouter(apiRouter)
+    installDientRouter(apiRouter);
+    installPakketRouter(apiRouter);
+    installEventRouter(apiRouter);
     app.use(apiRouter.routes()).use(apiRouter.allowedMethods());
 }
