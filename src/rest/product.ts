@@ -1,10 +1,6 @@
 import Router from 'koa-router';
 import { Context } from 'koa';
 import * as productenService from '../service/product.service';
-import { RequestContext } from '@mikro-orm/core';
-import { DI } from '../data/data-index';
-import { Winkel } from '../entities/Winkel.entity';
-import { Product } from '../entities/Product.entity';
 import { body, param, query, validationResults } from 'koa-req-validation';
 import ValidationResult from 'koa-req-validation/dist/lib/ValidationResult';
 import { getByIDValidation, RequestError } from './requestError';
