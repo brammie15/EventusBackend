@@ -19,7 +19,7 @@ export const getAll = async () : Promise<getRequest> => {
 }
 
 export const getByID = async (id: number) : Promise<Pakket> => {
-    const pakket = await DI.pakkettenRepo.findOne({id});
+    const pakket = await DI.pakkettenRepo.findOne({id}, {populate: ['diensten', 'producten']});
     return pakket;
 }
 

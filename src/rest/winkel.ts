@@ -1,12 +1,8 @@
 import Router from 'koa-router';
 import { Context } from 'koa';
 import * as winkelService from '../service/winkel.service';
-import { RequestContext } from '@mikro-orm/core';
-import { DI } from '../data/data-index';
-import { Winkel } from '../entities/Winkel.entity';
 import { body, query, validationResults } from 'koa-req-validation';
 import ValidationResult from 'koa-req-validation/dist/lib/ValidationResult';
-import { IMappedValidationResults } from 'koa-req-validation/dist/lib/types';
 import { getByIDValidation, RequestError } from './requestError';
 
 const getAll = async (ctx: Context) : Promise<void> => {
