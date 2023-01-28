@@ -10,7 +10,6 @@ import { Event } from "../entities/Event.entity";
 export const getAll = async () : Promise<getRequest> => {
     const events = await DI.eventsRepo.findAll( { populate: ['diensten', 'producten', 'pakketten']});
 
-
     const outputEvents : getRequest = {
         items: events,
         count: events.length
