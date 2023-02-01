@@ -1,7 +1,8 @@
 import { DI } from "../data/data-index";
 import { Product } from "../entities/Product.entity";
 import { Winkel } from "../entities/Winkel.entity";
-import { getRequest } from "../returnTypes";
+import { getLogger } from "../logging";
+import { databaseOperationResult, getRequest } from "../returnTypes";
 
 
 
@@ -14,7 +15,6 @@ export const getAll = async () : Promise<getRequest> => {
         items: producten,
         count: producten.length
     }
-    console.log(outputProducten)
     return outputProducten;
 }
 
@@ -23,18 +23,64 @@ export const getByID = async (id: number) : Promise<Product> => {
     return product;
 }
 
-export const create = async (body: any) : Promise<Product> => {
-    console.log("create product")
-    console.log(body)
-    // const winkel = await DI.winkelRepo.findOne();
-    
-    var newProduct = new Product(body.naam, body.prijs, DI.em.getReference(Winkel, body.winkel_id));
-    const newProductIn = await DI.productenRepo.create(newProduct);
+export const create = async (body: any) : Promise<databaseOperationResult> => {
+    try{
+        const newProduct = await DI.productenRepo.create(body);
+        await DI.productenRepo.persistAndFlush(newProduct);
+        return {
+            result: newProduct,
+            errors: []
+        };
+    }
+    catch(error){
+        return {
+            result: null,
+            errors: [error]
+        };
+    }
+}
 
-    newProduct.id = newProductIn.id;
+export const updateByID = async (id: number, body: any) : Promise<databaseOperationResult> => {
+    try{
+        var product: Product = await getByID(id);
+        if(product == null){
+            return {
+                result: null,
+                errors: ["Product not found"]
+            };
+        }
+        DI.productenRepo.assign(product, body);
+        await DI.productenRepo.persistAndFlush(product);
+        return {
+            result: product,
+            errors: []
+        };
+    }catch(error){
+        return {
+            result: null,
+            errors: [error]
+        };
+    }
+}
 
-
-
-    await DI.productenRepo.persistAndFlush(newProductIn);
-    return newProduct;
+export const deleteByID = async (id: number) : Promise<databaseOperationResult> => {
+    try{
+        var product: Product = await getByID(id);
+        if(product == null){
+            return {
+                result: null,
+                errors: ["Product not found"]
+            };
+        }
+        await DI.productenRepo.removeAndFlush(product);
+        return {
+            result: product,
+            errors: []
+        };
+    }catch(error){
+        return {
+            result: null,
+            errors: [error]
+        };
+    }
 }

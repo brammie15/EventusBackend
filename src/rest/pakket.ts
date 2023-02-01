@@ -4,12 +4,13 @@ import * as pakketenService from '../service/pakket.service';
 import { body, validationResults } from 'koa-req-validation';
 import { getByIDValidation, RequestError } from './requestError';
 import ValidationResult from 'koa-req-validation/dist/lib/ValidationResult';
+import { getLogger } from '../logging';
 
 const getAll = async (ctx: Context) : Promise<void> => {
     try {
         ctx.body = await pakketenService.getAll();
     } catch (error) {
-        console.log(error);
+        getLogger().error(error);
         return ctx.throw(400, {message : error.message})        
     }
 }
@@ -23,7 +24,7 @@ const getByID = async (ctx: Context) : Promise<void> => {
         }
         ctx.body = await pakketenService.getByID(Number(ctx.params.id));
     } catch (error) {
-        console.log(error);
+        getLogger().error(error);
         return ctx.throw(400, {message : error.message})
     }
 }
@@ -34,11 +35,48 @@ const create = async (ctx: Context) : Promise<void> => {
         ctx.body = pakket;
     }
     catch (error) {
-        console.log(error);
+        getLogger().error(error);
         return ctx.throw(400, {message : error.message})
     }
 }
         
+const updateByID = async (ctx: Context) : Promise<void> => {
+    try{
+        const errors: ValidationResult = validationResults(ctx);
+        if(errors.hasErrors()){
+            ctx.body = RequestError(400, errors.mapped());
+            return;
+        }
+        const pakket = await pakketenService.updateByID(Number(ctx.params.id), ctx.request.body);
+        if(pakket.errors.length > 0){
+            ctx.body = RequestError(400, pakket.errors);
+            return;
+        }
+        ctx.body = pakket;
+    }catch(error){
+        getLogger().error(error);
+        return ctx.throw(400, {message : error.message})
+    }
+}
+
+const deleteByID = async (ctx: Context) : Promise<void> => {
+    try{
+        const errors: ValidationResult = validationResults(ctx);
+        if(errors.hasErrors()){
+            ctx.body = RequestError(400, errors.mapped());
+            return;
+        }
+        const pakket = await pakketenService.deleteByID(Number(ctx.params.id));
+        if(pakket.errors.length > 0){
+            ctx.body = RequestError(400, pakket.errors);
+            return;
+        }
+        ctx.body = pakket;
+    }catch(error){
+        getLogger().error(error);
+        return ctx.throw(400, {message : error.message})
+    }
+}
 
 
 export function installPakketRouter(app) : void{
@@ -57,6 +95,8 @@ export function installPakketRouter(app) : void{
     pakketRouter.get('/', getAll);
     pakketRouter.get('/:id',...getByIDValidation, getByID);
     pakketRouter.post('/', ...createValidation, create);
+    pakketRouter.put('/:id', updateByID);
+    pakketRouter.delete('/:id', deleteByID);
 
     app.use(pakketRouter.routes()).use(pakketRouter.allowedMethods());
 }   

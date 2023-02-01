@@ -6,16 +6,6 @@ import { Product } from '../entities/Product.entity';
 import { Winkel } from '../entities/Winkel.entity';
 import config from '../mikro-orm.config';
 
-// MikroORM.init({
-//     // entities: [Winkel],
-//     dbName: 'winkel',
-//     type: 'sqlite',
-//     debug: true,
-//     baseDir: __dirname,
-// }).then((orm) => {
-//     console.log("Data source initialized");
-// });
-
 export const DI = {} as {
     orm: MikroORM,
     em: EntityManager

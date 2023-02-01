@@ -14,7 +14,7 @@ const config: Options = {
     type: 'sqlite',     
     highlighter: new SqlHighlighter(),
     baseDir: process.cwd(),
-    debug: true,
+    debug: false,
 };
 
 export default config;
